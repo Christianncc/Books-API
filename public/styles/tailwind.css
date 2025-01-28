@@ -1,0 +1,9 @@
+/* Tailwind's base, components, and utilities */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add your custom styles here if necessary */
+@layer base {
+  /* Custom base styles can go here */
+}

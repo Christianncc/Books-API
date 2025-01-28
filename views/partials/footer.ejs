@@ -1,0 +1,120 @@
+
+
+</main>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+  // Frontend JavaScript for handling real-time search suggestions
+
+
+  if (document.getElementById("error-message")) {
+    setTimeout(() => {
+      document.getElementById("error-message").style.display = "none";
+    }, 3000);
+  }
+
+
+  const $searchInput = $("#search-box"); // Ensure this matches the input field id
+const $suggestionsList = $("#suggestions");
+
+
+  let debounceTimer;
+
+  // Function to fetch suggestions from the backend
+  function fetchSuggestions() {
+    const query = $searchInput.val();
+    if (query.length < 3) {
+      $suggestionsList.empty(); // Clear suggestions if input is too short
+      return;
+    }
+
+    $.get(`/suggestions?query=${query}`, function(data) {
+      displaySuggestions(data); // Call displaySuggestions with the data
+    }).fail(function(error) {
+      console.error('Error fetching suggestions:', error);
+    });
+  }
+
+  // Function to display suggestions
+ // Function to display suggestions
+ function displaySuggestions(suggestions) {
+  console.log("Suggestions received:", suggestions); // Check if suggestions are being received
+  $suggestionsList.empty(); // Clear previous suggestions
+
+  const maxResults = 5; // Limit the number of displayed suggestions
+  suggestions.slice(0, maxResults).forEach(function(suggestion) {
+    console.log("Processing suggestion:", suggestion); // Check each suggestion
+    const $listItem = $("<li>").addClass("suggestion-item mt-2 flex items-center"); // Use flex to align image and title in a row
+
+    if (suggestion.cover) {
+      const $cover = $("<img>")
+        .attr("src", suggestion.cover)
+        .addClass("suggestion-cover")
+        .attr("width", "50") // Set width to 50px
+        .attr("height", "80"); // Set height to 80px
+      $listItem.append($cover);
+    }
+
+    const $title = $("<span>").html(suggestion.title.replace(new RegExp($searchInput.val(), 'gi'), function(match) {
+      return `<span class="highlight">${match}</span>`; // Highlight the search term
+    }));
+
+    $listItem.append($title);
+
+    $listItem.on("click", function() {
+      $searchInput.val(suggestion.title); // Populate the search bar with the clicked suggestion
+      $suggestionsList.empty(); // Clear suggestions after selection
+    });
+
+    $suggestionsList.append($listItem);
+  });
+}
+
+  // Debounced search event listener to limit the number of API calls
+  $searchInput.on("input", function() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(fetchSuggestions, 300); // Wait for 300ms after typing stops
+  });
+
+    // Handle "Add" button click event (without adding to collection)
+    $(document).on('click', '.add-button', function() {
+    const title = $(this).data('title');
+    const author = $(this).data('author');
+    const isbn = $(this).data('isbn');  // Change 'date' to 'isbn'
+
+    // For now, just log the book details to the console with ISBN
+    console.log(`Book Added: ${title}, Author: ${author}, ISBN: ${isbn}`);
+  });
+
+  const hamburgerButton = document.getElementById('hamburger-button');
+        const sideMenu = document.getElementById('side-menu');
+        const closeButton = document.getElementById('close-button');
+        const hamburgerContainer = document.getElementById('hamburger-container');
+
+        // Toggle side menu visibility and hide hamburger icon
+        hamburgerButton.addEventListener('click', () => {
+            sideMenu.classList.toggle('hidden');
+            hamburgerContainer.classList.toggle('hidden');
+        });
+
+        // Close side menu when clicking the X button and show hamburger icon
+        closeButton.addEventListener('click', () => {
+            sideMenu.classList.add('hidden');
+            hamburgerContainer.classList.remove('hidden');
+        });
+
+        // Hide side menu when resizing the screen above 767px and show hamburger icon
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 767) {
+                sideMenu.classList.add('hidden');
+                hamburgerContainer.classList.remove('hidden');
+            }
+        });
+    
+  
+ 
+</script>
+
+</body>
+
+</html>
